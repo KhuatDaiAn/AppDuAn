@@ -1,177 +1,151 @@
-import React, {useState, useEffect} from 'react';
-import {Block, Text, Button} from '@components';
-import {
-  StyleSheet,
-  ImageBackground,
-  Platform,
-  NativeModules,
-  StatusBar,
-  Image,
-} from 'react-native';
-import {images} from '@assets';
-import {theme} from '@theme';
+import { icons } from '@assets';
+import { Block, Button, Text } from '@components';
 import IconView from '@components/Icon';
-import {useNavigation} from '@react-navigation/native';
-import {routes} from '@navigation/routes';
+import { useAppDispatch, useAppSelector } from '@hooks';
+import { routes } from '@navigation/routes';
+import { useNavigation } from '@react-navigation/native';
+import { changeLanguage, changeTheme } from '@redux/reducerNew';
+import { theme } from '@theme';
+import { isEmpty } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import { withNamespaces } from 'react-i18next';
+import {
+    Image,
+    NativeModules,
+    Platform,
+    StatusBar,
+    // Text as Text1,
+} from 'react-native';
+import { makeStyles, useTheme } from 'themeNew';
 
-const {colors, fonts} = theme;
+const { fonts } = theme;
 
-const HeaderHome = ({name, image}) => {
-  const navigation = useNavigation();
-  const [paddingTop, setPaddingTop] = useState(0);
-  const [showMoney, setShowMoney] = useState(false);
+const HeaderHome = props => {
+    const { name, image, setIsCollapsible, isCollapsible, t } = props;
+    const navigation = useNavigation();
+    const [paddingTop, setPaddingTop] = useState(0);
+    const [showMoney, setShowMoney] = useState(false);
+    const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    if (Platform.OS === 'ios') {
-      NativeModules.StatusBarManager.getHeight(statusBarHeight => {
-        const STATUS_BAR_HEIGHT = statusBarHeight.height;
-        setPaddingTop(STATUS_BAR_HEIGHT);
-      });
-    } else {
-      const STATUS_BAR_HEIGHT = StatusBar.currentHeight;
-      setPaddingTop(STATUS_BAR_HEIGHT);
-    }
-  }, []);
+    const themeStore = useAppSelector(state => state.root.themeApp.theme);
+    const languageStore = useAppSelector(state => state.root.setting.language);
+    const themeNew = useTheme(themeStore);
+    const styles = useStyle(props, themeStore);
 
-  return (
-    <Block style={[styles.container, {paddingTop: paddingTop}]}>
-      <Block width={'100%'} alignCenter marginTop={20}>
-        <Block space={'between'} row width={'100%'}>
-          <Block alignCenter row marginLeft={10}>
-            <Image
-              source={{uri: image}}
-              style={{width: 40, height: 40, borderRadius: 100}}
-            />
-            <Text
-              marginLeft={10}
-              size={18}
-              marginHorizontal={5}
-              color={colors.white}
-              style={{fontFamily: 'Lato-Bold'}}>
-              {name}
-            </Text>
-          </Block>
+    useEffect(() => {
+        if (Platform.OS === 'ios') {
+            NativeModules.StatusBarManager.getHeight(statusBarHeight => {
+                const STATUS_BAR_HEIGHT = statusBarHeight.height;
+                setPaddingTop(STATUS_BAR_HEIGHT);
+            });
+        } else {
+            const STATUS_BAR_HEIGHT = StatusBar.currentHeight;
+            setPaddingTop(STATUS_BAR_HEIGHT);
+        }
+    }, []);
 
-          <Block row marginRight={20}>
-            <IconView
-              component={'MaterialCommunityIcons'}
-              name={'bell-outline'}
-              size={25}
-              color={colors.white}
-            />
-          </Block>
-        </Block>
-
-        <Block space={'between'} row width={'100%'} marginTop={10}>
-          <Block>
-            <Block row marginLeft={7}>
-              <Text
-                marginLeft={10}
-                size={14}
-                marginHorizontal={5}
-                color={colors.white}
-                fontType={'bold1'}>
-                Số dư tài khoản
-              </Text>
-              <Button onPress={() => setShowMoney(!showMoney)}>
-                <IconView
-                  component={'Ionicons'}
-                  name={showMoney ? 'md-eye' : 'md-eye-off'}
-                  size={20}
-                  color={colors.white}
+    return (
+        <Block
+            width="100%"
+            borderBottomWidth={1}
+            borderColor={themeNew.colors.grey12}
+            space={'between'}
+            row
+            backgroundColor={themeNew.colors.background}
+            paddingVertical={20}>
+            <Block alignCenter row marginLeft={15} flex>
+                <Image
+                    source={!isEmpty(image) ? { uri: image } : icons.logo}
+                    style={{ width: 40, height: 40, borderRadius: 100 }}
                 />
-              </Button>
+                <Block flexGrow={1}>
+                    <Text
+                        marginLeft={10}
+                        size={12}
+                        fontType="medium1"
+                        marginHorizontal={5}
+                        color={themeNew.colors.grey8}>
+                        Welcom to BookWorld!
+                    </Text>
+                    <Text
+                        marginLeft={10}
+                        marginRight={40}
+                        size={18}
+                        marginHorizontal={5}
+                        color={themeNew.colors.textInBox}
+                        fontType="medium1"
+                        numberOfLines={1}>
+                        {isEmpty(name.trim()) ? 'Update name' : name}
+                    </Text>
+                </Block>
             </Block>
-            <Block justifyCenter height={40} marginLeft={10}>
-              {showMoney ? (
-                <Text
-                  size={25}
-                  marginHorizontal={5}
-                  color={colors.white}
-                  fontType={'bold'}>
-                  *********
-                </Text>
-              ) : (
-                <Text
-                  size={25}
-                  marginHorizontal={5}
-                  color={colors.white}
-                  fontType={'bold'}>
-                  1.200.000
-                </Text>
-              )}
-            </Block>
-          </Block>
 
-          <Block marginRight={20} alignCenter>
-            <Button onPress={() => navigation.navigate(routes.SCREEN_PAYMENT)}>
-              <Block
-                backgroundColor={theme.colors.white}
-                radius={12}
-                width={40}
-                height={40}
-                justifyCenter
-                alignCenter>
-                <IconView
-                  component={'Ionicons'}
-                  name={'add'}
-                  size={25}
-                  color={colors.gray}
-                />
-              </Block>
-            </Button>
-            <Text color={theme.colors.gray4}>Nap tien</Text>
-          </Block>
+            <Block marginRight={15}>
+                <Button
+                    onPress={() =>
+                        navigation.navigate(routes.NOTIFICATION_SCREEN)
+                    }>
+                    <IconView
+                        component={'MaterialCommunityIcons'}
+                        name={'bell-outline'}
+                        size={25}
+                        color={themeNew.colors.textInBox}
+                    />
+                </Button>
+            </Block>
+            {/* </ImageBackground> */}
         </Block>
-      </Block>
-      {/* </ImageBackground> */}
-    </Block>
-  );
+    );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    height: 180,
-    paddingHorizontal: -20,
-    backgroundColor: theme.colors.red,
-    borderBottomLeftRadius: 15,
-    borderBottomRightRadius: 15,
-  },
-  bg_sell: {
-    width: '100%',
-    height: 150,
-    zIndex: 0,
-    flex: 1,
-    resizeMode: 'cover',
-  },
-  border_bg_sell: {
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  borderPersent: {
-    borderTopLeftRadius: 20,
-    borderBottomRightRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 5,
+const useStyle = makeStyles()(({ normalize, colors }) => ({
+    container: {
+        paddingHorizontal: -20,
     },
-    shadowOpacity: 0.34,
-    shadowRadius: 6.27,
+    bg_sell: {
+        width: '100%',
+        height: 150,
+        zIndex: 0,
+        flex: 1,
+        resizeMode: 'cover',
+    },
+    border_bg_sell: {
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
+    },
+    borderPersent: {
+        borderTopLeftRadius: 20,
+        borderBottomRightRadius: 10,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 5,
+        },
+        shadowOpacity: 0.34,
+        shadowRadius: 6.27,
 
-    elevation: 10,
-  },
-  textDecoration: {
-    textDecorationLine: 'line-through',
-    textDecorationColor: 'black',
-  },
-  btnBuyNow: {
-    borderRadius: 8,
-    backgroundColor: colors.lightGreen1,
-    paddingHorizontal: 30,
-    paddingVertical: 8,
-    marginTop: 5,
-  },
-});
+        elevation: 10,
+    },
+    textDecoration: {
+        textDecorationLine: 'line-through',
+        textDecorationColor: 'black',
+    },
+    btnBuyNow: {
+        borderRadius: 8,
+        backgroundColor: colors.lightGreen1,
+        paddingHorizontal: 30,
+        paddingVertical: 8,
+        marginTop: 5,
+    },
+    btnExpand: {
+        backgroundColor: colors.text,
+        borderRadius: 50,
+        height: 35,
+        width: 35,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: -15,
+    },
+}));
 
-export default HeaderHome;
+export default withNamespaces()(HeaderHome);

@@ -1,21 +1,36 @@
 import React from 'react';
-import {Block} from '@components';
+import { Block, Container, HeaderWithButton } from '@components';
 import HeaderEditMoreMy from './components/HeaderEditMoreMy';
-import {ScrollView} from 'react-native';
+import { ScrollView } from 'react-native';
 import ItemEditLastMoreMy from './components/ItemEditLastMoreMy';
 import ItemEditMoreMy from './components/ItemEditMoreMy';
 import BodyEditMoreMy from './components/BodyEditMoreMy';
-const MoreMyApp = () => {
-  return (
-    <Block flex justifyCenter>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <BodyEditMoreMy />
-        <ItemEditMoreMy />
-        <ItemEditLastMoreMy />
-      </ScrollView>
-      <HeaderEditMoreMy title={'Hồ sơ của bạn'} />
-    </Block>
-  );
+import { useAppSelector } from 'hooks';
+import { makeStyles, useTheme } from 'themeNew';
+import { withNamespaces } from 'react-i18next';
+
+const EditMoreMyApp = props => {
+    const { t } = props;
+    const myInfo = useAppSelector(state => state.root.auth);
+    const themeStore = useAppSelector(state => state.root.themeApp.theme);
+    const { colors } = useTheme(themeStore);
+
+    return (
+        <Container
+            style={{ backgroundColor: colors.background, flex: 1 }}
+            statusColor={colors.background}>
+            <HeaderWithButton title={t('profile')} isBackHeader />
+            <ScrollView showsVerticalScrollIndicator={false}>
+                <BodyEditMoreMy
+                    name={myInfo?.name}
+                    image={myInfo?.image}
+                    email={myInfo?.email}
+                />
+                <ItemEditMoreMy />
+                <ItemEditLastMoreMy />
+            </ScrollView>
+        </Container>
+    );
 };
 
-export default MoreMyApp;
+export default withNamespaces()(EditMoreMyApp);

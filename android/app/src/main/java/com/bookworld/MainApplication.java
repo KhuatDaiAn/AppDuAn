@@ -12,13 +12,13 @@ import com.facebook.react.config.ReactFeatureFlags;
 import com.facebook.soloader.SoLoader;
 import com.bookworld.newarchitecture.MainApplicationReactNativeHost;
 import java.lang.reflect.InvocationTargetException;
-import com.bookworld.zpmodule.PayZaloBridge;
+// import com.bookworld.zpmodule.PayZaloBridge;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
-import vn.zalopay.sdk.Environment;
-import vn.zalopay.sdk.ZaloPaySDK;
+// import vn.zalopay.sdk.Environment;
+// import vn.zalopay.sdk.ZaloPaySDK;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -35,7 +35,7 @@ public class MainApplication extends Application implements ReactApplication {
       // Packages that cannot be autolinked yet can be added manually here, for
       // example:
       // packages.add(new MyReactNativePackage());
-      packages.add(new PayZaloBridge());
+      // packages.add(new PayZaloBridge());
       return packages;
     }
 
@@ -68,8 +68,7 @@ public class MainApplication extends Application implements ReactApplication {
     // If you opted-in for the New Architecture, we enable the TurboModule system
     ReactFeatureFlags.useTurboModules = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED;
     SoLoader.init(this, /* native exopackage */ false);
-    initializeFlipper(this);
-    ZaloPaySDK.init(2553, Environment.SANDBOX);
+    initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
   }
 
   /**
@@ -80,15 +79,17 @@ public class MainApplication extends Application implements ReactApplication {
    * @param context
    */
   private static void initializeFlipper(
-      Context context) {
+      Context context, ReactInstanceManager reactInstanceManager) {
     if (BuildConfig.DEBUG) {
       try {
         /*
-         * We use reflection here to pick up the class that initializes Flipper,
-         * since Flipper library is not available in release mode
-         */
-        Class<?> aClass = Class.forName("com.facebook.flipper.ReactNativeFlipper");
-        aClass.getMethod("initializeFlipper", Context.class).invoke(null, context);
+         We use reflection here to pick up the class that initializes Flipper,
+        since Flipper library is not available in release mode
+        */
+        Class<?> aClass = Class.forName("com.bookworld.ReactNativeFlipper");
+        aClass
+            .getMethod("initializeFlipper", Context.class, ReactInstanceManager.class)
+            .invoke(null, context, reactInstanceManager);
       } catch (ClassNotFoundException e) {
         e.printStackTrace();
       } catch (NoSuchMethodException e) {
